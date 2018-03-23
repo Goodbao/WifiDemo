@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.bao.wifidemo"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+ext.support_version = '27.0.2'
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.android.support:appcompat-v7:${support_version}"
+    implementation "com.android.support:recyclerview-v7:${support_version}"
+    implementation "com.android.support:design:${support_version}"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    //butterknife
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //动态权限
+    compile 'com.yanzhenjie:permission:1.1.2'
+    //工具大全
+    compile 'com.blankj:utilcode:1.13.1'
+    //kotlin
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    //优化RecyclerView.Adapter
+    compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.34'
+}
+repositories {
+    mavenCentral()
+}

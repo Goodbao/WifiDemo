@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_open_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/open_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+        <include layout="@layout/global_black_vertical_line" />
+
+        <TextView
+            android:id="@+id/tv_close_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/close_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+        <include layout="@layout/global_black_vertical_line" />
+
+        <TextView
+            android:id="@+id/tv_scan_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/scan_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+        <include layout="@layout/global_black_vertical_line" />
+
+        <TextView
+            android:id="@+id/tv_wifi_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/wifi_info"
+            android:textSize="@dimen/control_tv_text_size" />
+
+    </LinearLayout>
+
+    <include layout="@layout/global_black_line" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/et_wifi_name"
+        android:background="@null"
+        android:text="bao_phone"
+        android:padding="@dimen/control_tv_padding"
+        android:hint="@string/wifi_name"
+        android:maxLines="1"
+        android:layout_height="wrap_content" />
+
+    <include layout="@layout/global_black_line"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/et_wifi_pwd"
+        android:text="baozi888888"
+        android:background="@null"
+        android:padding="@dimen/control_tv_padding"
+        android:hint="@string/wifi_pwd"
+        android:maxLines="1"
+        android:layout_height="wrap_content" />
+
+    <include layout="@layout/global_black_line"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_connection_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/connection_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+        <include layout="@layout/global_black_vertical_line" />
+
+        <TextView
+            android:id="@+id/tv_disconnection_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/disconnection_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+        <include layout="@layout/global_black_vertical_line" />
+
+        <TextView
+            android:id="@+id/tv_delete_wifi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="@dimen/control_tv_padding"
+            android:text="@string/delete_wifi"
+            android:textSize="@dimen/control_tv_text_size" />
+
+    </LinearLayout>
+
+    <include layout="@layout/global_black_line" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_wifi_message"
+            android:padding="@dimen/control_tv_padding"/>
+
+    </ScrollView>
+
+</LinearLayout>

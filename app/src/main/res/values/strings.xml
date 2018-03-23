@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">WifiDemo</string>
+
+    <!-- Global -->
+    <string name="wifi_control">wifi控制</string>
+    <string name="wifi_tcp">wifi_tcp通信</string>
+    <string name="wifi_udp">wifi_udp通信</string>
+    <string name="open_wifi">打开wifi</string>
+    <string name="close_wifi">关闭wifi</string>
+    <string name="scan_wifi">搜索wifi</string>
+    <string name="connection_wifi">连接</string>
+    <string name="disconnection_wifi">断开</string>
+    <string name="delete_wifi">删除</string>
+    <string name="wifi_name">wifi名称</string>
+    <string name="wifi_pwd">wifi密码</string>
+    <string name="wifi_info">wifi信息</string>
+    <string name="wifi_state_disabled">wifi已经关闭</string>
+    <string name="wifi_state_disabling">wifi正在关闭</string>
+    <string name="wifi_state_enabled">wifi已开启</string>
+    <string name="wifi_state_enabling">wifi正在开启</string>
+    <string name="wifi_connected" formatted="false">已连接到wifi:%s</string>
+    <string name="unable_remove">无法删除，请到wifi设置页面，手动删除</string>
+    <string name="wifi_disconnect">wifi验证失败，可能是密码错误</string>
+    <string name="send">发送</string>
+    <string name="stop">终止</string>
+    <string name="receiver">接收</string>
+    <string name="connect">建立连接</string>
+
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="setting">设置</string>
+
+    <!-- tcp -->
+    <string name="tcp_server">先开启TCP_Server</string>
+    <string name="tcp_client">再开启TCP_Client</string>
+
+    <!-- permission -->
+    <string name="permission_request_error">"申请权限失败"</string>
+    <string name="permission_location">APP正常运行需要定位权限，被您拒绝或者系统发生错误申请失败，请您到权限设置页面手动授权，否则功能无法正常使用！</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_wifi_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="@dimen/main_module_padding"
+        android:text="@string/wifi_control"
+        android:textColor="@color/main_module_tv_color"
+        android:textSize="@dimen/main_module_tv_text_size" />
+
+    <include layout="@layout/global_black_line" />
+
+    <TextView
+        android:id="@+id/tv_wifi_tcp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="@dimen/main_module_padding"
+        android:text="@string/wifi_tcp"
+        android:textColor="@color/main_module_tv_color"
+        android:textSize="@dimen/main_module_tv_text_size" />
+
+    <include layout="@layout/global_black_line" />
+
+    <TextView
+        android:id="@+id/tv_wifi_udp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="@dimen/main_module_padding"
+        android:text="@string/wifi_udp"
+        android:textColor="@color/main_module_tv_color"
+        android:textSize="@dimen/main_module_tv_text_size" />
+
+    <include layout="@layout/global_black_line" />
+
+</LinearLayout>

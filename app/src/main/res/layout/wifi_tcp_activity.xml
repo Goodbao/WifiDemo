@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/et_server_ip"
+        android:layout_width="wrap_content"
+        android:hint="用两台手机，连上同一个wifi，然后把服务端（server）的ip地址写在这个Edittext，然后再去通信!!!够清楚了吧"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/tv_tcp_server"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tcp_server"
+        app:layout_constraintBottom_toTopOf="@+id/tv_tcp_client"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/tv_tcp_client"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tcp_client"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_tcp_server" />
+
+</android.support.constraint.ConstraintLayout>

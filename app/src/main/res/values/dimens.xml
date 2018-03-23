@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- MainActivity -->
+    <dimen name="main_module_tv_text_size">15sp</dimen>
+    <dimen name="main_module_padding">15dp</dimen>
+
+    <!-- WifiControlActivity -->
+    <dimen name="control_tv_text_size">15sp</dimen>
+    <dimen name="control_tv_padding">15dp</dimen>
+
+    <!-- TcpActivity -->
+    <dimen name="tcp_tv_text_size">15sp</dimen>
+    <dimen name="tcp_tv_padding">15dp</dimen>
+
+</resources>
