@@ -2,6 +2,7 @@ package com.bao.wifidemo.activity;
 
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import com.bao.wifidemo.R;
 import com.bao.wifidemo.receiver.WifiBroadcastReceiver;
+import com.bao.wifidemo.utils.Constants;
 import com.bao.wifidemo.utils.WifiControlUtils;
 import com.blankj.utilcode.util.ToastUtils;
 
@@ -23,8 +25,7 @@ import butterknife.OnClick;
  * Created by bao on 2018/3/21.
  * wifi控制Activity
  */
-public class WifiControlActivity extends AppCompatActivity
-{
+public class WifiControlActivity extends AppCompatActivity {
     @BindView(R.id.tv_open_wifi)
     TextView tvOpenWifi;
     @BindView(R.id.tv_close_wifi)
@@ -49,9 +50,10 @@ public class WifiControlActivity extends AppCompatActivity
     private WifiBroadcastReceiver wifiBroadcastReceiver;
     private WifiControlUtils wifiControlUtils;
 
+    private WifiInfo wifiInfo;
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState)
-    {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_control_activity);
         ButterKnife.bind(this);
@@ -65,15 +67,31 @@ public class WifiControlActivity extends AppCompatActivity
         registerReceiver(wifiBroadcastReceiver, intentFilter);
 
         wifiControlUtils = new WifiControlUtils(this);
+        wifiInfo = wifiControlUtils.getWifiInfo();
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //连接指定wifi
+        wifiControlUtils.addNetWork(Constants.INSTANCE.getWIFI_NAME(), Constants.INSTANCE.getWIFI_PWD(), WifiControlUtils.WIFI_CIPHER_WAP);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //移除指定wifi
+        wifiControlUtils.removeWifi(Constants.INSTANCE.getWIFI_NAME());
+        wifiControlUtils.addNetWork(wifiInfo.getSSID());
+    }
+
 
     @OnClick({R.id.tv_open_wifi, R.id.tv_close_wifi, R.id.tv_scan_wifi
             , R.id.tv_connection_wifi, R.id.tv_disconnection_wifi, R.id.tv_delete_wifi
             , R.id.tv_wifi_message, R.id.tv_wifi_info})
-    public void onViewClicked(View view)
-    {
-        switch (view.getId())
-        {
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
             case R.id.tv_open_wifi:
                 wifiControlUtils.openWifi();
                 break;
@@ -84,12 +102,20 @@ public class WifiControlActivity extends AppCompatActivity
                 wifiControlUtils.scanWifi();
                 ToastUtils.showShort("扫描到" + wifiControlUtils.getWifiList().size() + "个wifi");
                 StringBuilder stringBuilder = new StringBuilder();
-                for (ScanResult scanResult : wifiControlUtils.getWifiList())
-                {
+
+                stringBuilder.append("上一次连接的wifi:");
+                stringBuilder.append(wifiInfo.getSSID());
+                stringBuilder.append(":");
+                stringBuilder.append(wifiInfo.getBSSID());
+                stringBuilder.append("  强度：" + wifiInfo.getRssi());
+                stringBuilder.append("\n\n");
+
+                for (ScanResult scanResult : wifiControlUtils.getWifiList()) {
                     stringBuilder.append(scanResult.SSID);
                     stringBuilder.append(":");
                     stringBuilder.append(scanResult.BSSID);
-                    stringBuilder.append("\n");
+                    stringBuilder.append("  强度：" + scanResult.level);
+                    stringBuilder.append("\n\n");
                 }
                 tvWifiMessage.setText(stringBuilder.toString());
                 break;
@@ -103,8 +129,7 @@ public class WifiControlActivity extends AppCompatActivity
                 wifiControlUtils.disconnectWifi(etWifiName.getText().toString());
                 break;
             case R.id.tv_delete_wifi:
-                if (!wifiControlUtils.removeWifi(etWifiName.getText().toString()))
-                {
+                if (!wifiControlUtils.removeWifi(etWifiName.getText().toString())) {
                     ToastUtils.showShort(R.string.unable_remove);
                 }
                 break;
@@ -115,8 +140,7 @@ public class WifiControlActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         super.onDestroy();
         //注销广播
         unregisterReceiver(wifiBroadcastReceiver);

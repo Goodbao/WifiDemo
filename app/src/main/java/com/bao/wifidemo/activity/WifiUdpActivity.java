@@ -3,6 +3,7 @@ package com.bao.wifidemo.activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.bao.wifidemo.R;
 import com.bao.wifidemo.utils.Constants;
+import com.blankj.utilcode.util.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +24,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,8 +38,7 @@ import butterknife.OnClick;
  * Udp通信Activity
  * 测试端口号20001，接收端口号4001，ip：224.0.0.1
  */
-public class WifiUdpActivity extends AppCompatActivity
-{
+public class WifiUdpActivity extends AppCompatActivity {
     @BindView(R.id.btn_start)
     Button btnStart;
     @BindView(R.id.btn_stop)
@@ -45,12 +50,15 @@ public class WifiUdpActivity extends AppCompatActivity
 
     /* 用于 udpReceiveAndTcpSend 的3个变量 */
     private Socket socket = null;
-    private MulticastSocket ms = null;
-    private DatagramPacket dp;
+    private MulticastSocket multicastSocket = null;
+    private DatagramPacket datagramPacket;
+
+    private TcpReceive tcpReceive;
+    private UdpReceiveAndtcpSend udpReceiveAndtcpSend;
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState)
-    {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_udp_activity);
         ButterKnife.bind(this);
@@ -58,20 +66,33 @@ public class WifiUdpActivity extends AppCompatActivity
 
         tvSendInformation.append("\n\n");
         tvReceiveInformation.append("\n\n");
-          /* 开一个线程接收tcp 连接*/
-        new tcpReceive().start();
-         /* 开一个线程 接收udp多播 并 发送tcp 连接*/
-        new udpReceiveAndtcpSend().start();
+        /* 开一个线程接收tcp 连接*/
+        tcpReceive = new TcpReceive();
+        /* 开一个线程 接收udp多播 并 发送tcp 连接*/
+        udpReceiveAndtcpSend = new UdpReceiveAndtcpSend();
+
+        int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
+        int KEEP_ALIVE_TIME = 1;
+        TimeUnit KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
+        BlockingQueue blockingQueue = new LinkedBlockingQueue<Runnable>();
+        threadPoolExecutor = new ThreadPoolExecutor(NUMBER_OF_CORES
+                , NUMBER_OF_CORES * 2
+                , KEEP_ALIVE_TIME
+                , KEEP_ALIVE_TIME_UNIT
+                , blockingQueue);
+
+
+        threadPoolExecutor.execute(tcpReceive);
+        threadPoolExecutor.execute(udpReceiveAndtcpSend);
     }
 
     @OnClick({R.id.btn_start, R.id.btn_stop})
-    public void onViewClicked(View view)
-    {
-        switch (view.getId())
-        {
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
             case R.id.btn_start:
                 /* 新开一个线程 发送 udp 多播 */
-                new udpBroadCast("hi ~!" + System.getProperty("http.agent")).start();
+                UdpBroadCast udpBroadCast = new UdpBroadCast("hi ~!" + System.getProperty("http.agent"));
+                threadPoolExecutor.execute(udpBroadCast);
                 break;
             case R.id.btn_stop:
                 break;
@@ -82,33 +103,28 @@ public class WifiUdpActivity extends AppCompatActivity
     /**
      * 发送udp多播
      */
-    private class udpBroadCast extends Thread
-    {
+    private class UdpBroadCast extends Thread {
         MulticastSocket sender = null;
-        DatagramPacket dj = null;
+        DatagramPacket datagramPacket1 = null;
         InetAddress group = null;
 
         byte[] data = new byte[1024];
 
-        public udpBroadCast(String dataString)
-        {
+        public UdpBroadCast(String dataString) {
             data = dataString.getBytes();
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 sender = new MulticastSocket();
                 //ip
                 group = InetAddress.getByName(Constants.INSTANCE.getHOST_ADDRESS());
                 //端口号
-                dj = new DatagramPacket(data, data.length, group, Constants.INSTANCE.getHOST_PORT());
-                sender.send(dj);
+                datagramPacket1 = new DatagramPacket(data, data.length, group, Constants.INSTANCE.getHOST_PORT());
+                sender.send(datagramPacket1);
                 sender.close();
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -117,37 +133,29 @@ public class WifiUdpActivity extends AppCompatActivity
     /**
      * 接收udp多播 并 发送tcp 连接
      */
-    private class udpReceiveAndtcpSend extends Thread
-    {
+    private class UdpReceiveAndtcpSend extends Thread {
         @Override
-        public void run()
-        {
+        public void run() {
             byte[] data = new byte[1024];
-            try
-            {
+            try {
                 InetAddress groupAddress = InetAddress.getByName(Constants.INSTANCE.getHOST_ADDRESS());
-                ms = new MulticastSocket(Constants.INSTANCE.getHOST_PORT());
-                ms.joinGroup(groupAddress);
-            } catch (Exception e)
-            {
+                multicastSocket = new MulticastSocket(Constants.INSTANCE.getHOST_PORT());
+                multicastSocket.joinGroup(groupAddress);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            while (true)
-            {
-                try
-                {
-                    dp = new DatagramPacket(data, data.length);
-                    if (ms != null)
-                        ms.receive(dp);
-                } catch (Exception e)
-                {
+            while (true) {
+                try {
+                    datagramPacket = new DatagramPacket(data, data.length);
+                    if (multicastSocket != null)
+                        multicastSocket.receive(datagramPacket);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                if (dp.getAddress() != null)
-                {
-                    final String quest_ip = dp.getAddress().toString();
+                if (datagramPacket.getAddress() != null) {
+                    final String quest_ip = datagramPacket.getAddress().toString();
 
                     /* 若udp包的ip地址 是 本机的ip地址的话，丢掉这个包(不处理)*/
 
@@ -155,49 +163,39 @@ public class WifiUdpActivity extends AppCompatActivity
 
                     String host_ip = getLocalHostIp();
 
-                    System.out.println("host_ip:  --------------------  " + host_ip);
-                    System.out.println("quest_ip: --------------------  " + quest_ip.substring(1));
+                    LogUtils.d("host_ip:  --------------------  " + host_ip);
+                    LogUtils.d("quest_ip: --------------------  " + quest_ip.substring(1));
 
-                    if ((!host_ip.equals("")) && host_ip.equals(quest_ip.substring(1)))
-                    {
+                    if (!TextUtils.isEmpty(host_ip) && host_ip.equals(quest_ip.substring(1))) {
                         continue;
                     }
 
-                    final String codeString = new String(data, 0, dp.getLength());
+                    final String codeString = new String(data, 0, datagramPacket.getLength());
 
-                    tvReceiveInformation.post(new Runnable()
-                    {
+                    tvReceiveInformation.post(new Runnable() {
                         @Override
-                        public void run()
-                        {
+                        public void run() {
                             tvReceiveInformation.append("收到来自: \n" + quest_ip.substring(1) + "\n" + "的udp请求\n");
                             tvReceiveInformation.append("请求内容: " + codeString + "\n\n");
                         }
                     });
-                    try
-                    {
-                        final String target_ip = dp.getAddress().toString().substring(1);
-                        tvSendInformation.post(new Runnable()
-                        {
+                    try {
+                        final String target_ip = datagramPacket.getAddress().toString().substring(1);
+                        tvSendInformation.post(new Runnable() {
                             @Override
-                            public void run()
-                            {
+                            public void run() {
                                 tvSendInformation.append("发送tcp请求到: \n" + target_ip + "\n");
                             }
                         });
                         socket = new Socket(target_ip, Constants.INSTANCE.getPHONE_PORT());
-                    } catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
-                    } finally
-                    {
+                    } finally {
 
-                        try
-                        {
+                        try {
                             if (socket != null)
                                 socket.close();
-                        } catch (IOException e)
-                        {
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
@@ -210,62 +208,50 @@ public class WifiUdpActivity extends AppCompatActivity
     /**
      * 接收tcp连接
      */
-    private class tcpReceive extends Thread
-    {
+    private class TcpReceive extends Thread {
         ServerSocket serverSocket;
         Socket socket;
         BufferedReader in;
         String source_address;
 
         @Override
-        public void run()
-        {
-            while (true)
-            {
+        public void run() {
+            while (true) {
                 serverSocket = null;
                 socket = null;
                 in = null;
-                try
-                {
+                try {
                     serverSocket = new ServerSocket(Constants.INSTANCE.getPHONE_PORT());
                     socket = serverSocket.accept();
-                    if (socket != null)
-                    {
+                    if (socket != null) {
                         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         StringBuilder sb = new StringBuilder();
                         sb.append(socket.getInetAddress().getHostAddress());
 
                         String line = null;
-                        while ((line = in.readLine()) != null)
-                        {
+                        while ((line = in.readLine()) != null) {
                             sb.append(line);
                         }
 
                         source_address = sb.toString().trim();
-                        tvReceiveInformation.post(new Runnable()
-                        {
+                        tvReceiveInformation.post(new Runnable() {
                             @Override
-                            public void run()
-                            {
+                            public void run() {
                                 tvReceiveInformation.append("收到来自: " + "\n" + source_address + "\n" + "的tcp请求\n\n");
                             }
                         });
                     }
-                } catch (IOException e1)
-                {
+                } catch (IOException e1) {
                     e1.printStackTrace();
-                } finally
-                {
-                    try
-                    {
+                } finally {
+                    try {
                         if (in != null)
                             in.close();
                         if (socket != null)
                             socket.close();
                         if (serverSocket != null)
                             serverSocket.close();
-                    } catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -273,42 +259,37 @@ public class WifiUdpActivity extends AppCompatActivity
         }
     }
 
-    public String getLocalHostIp()
-    {
+    public String getLocalHostIp() {
         String ipaddress = "";
-        try
-        {
+        try {
             Enumeration<NetworkInterface> en = NetworkInterface
                     .getNetworkInterfaces();
             // 遍历所用的网络接口
-            while (en.hasMoreElements())
-            {
+            while (en.hasMoreElements()) {
                 // 得到每一个网络接口绑定的所有ip
                 NetworkInterface nif = en.nextElement();
                 Enumeration<InetAddress> inet = nif.getInetAddresses();
                 // 遍历每一个接口绑定的所有ip
-                while (inet.hasMoreElements())
-                {
+                while (inet.hasMoreElements()) {
                     InetAddress ip = inet.nextElement();
-                    if (!ip.isLoopbackAddress())
-                    {
+                    if (!ip.isLoopbackAddress()) {
                         return ip.getHostAddress();
                     }
                 }
             }
-        } catch (SocketException e)
-        {
+        } catch (SocketException e) {
             Log.e("feige", "获取本地ip地址失败");
             e.printStackTrace();
         }
         return ipaddress;
     }
 
-    // 按下返回键时，关闭 多播socket ms
+
     @Override
-    public void onBackPressed()
-    {
-        ms.close();
-        super.onBackPressed();
+    protected void onDestroy() {
+        //关闭 多播socket multicastSocket
+        multicastSocket.close();
+        threadPoolExecutor.shutdownNow();
+        super.onDestroy();
     }
 }

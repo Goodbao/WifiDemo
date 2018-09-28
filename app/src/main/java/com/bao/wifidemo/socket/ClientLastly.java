@@ -2,6 +2,7 @@ package com.bao.wifidemo.socket;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.bao.wifidemo.utils.Constants;
 import com.blankj.utilcode.util.LogUtils;
@@ -17,8 +18,7 @@ import java.net.Socket;
  *
  * @author Administrator
  */
-public class ClientLastly implements Runnable
-{
+public class ClientLastly implements Runnable {
     private static final String TAG = "tcp_client";
     public static final int CLIENT_ARG = 0x12;
     //超时时间，如果60S没通信，就会断开
@@ -30,8 +30,7 @@ public class ClientLastly implements Runnable
     Handler handler;
     private String server_ip;
 
-    public ClientLastly(Handler handler, String server_ip)
-    {
+    public ClientLastly(Handler handler, String server_ip) {
         this.handler = handler;
         this.server_ip = server_ip;
 //        try {
@@ -48,11 +47,9 @@ public class ClientLastly implements Runnable
     }
 
     //发数据
-    public void send(String data)
-    {
+    public void send(String data) {
         LogUtils.dTag(TAG, "客户端发送：" + data);
-        if (printWriter != null)
-        {
+        if (printWriter != null) {
             printWriter.println(data);
             printWriter.flush();
         }
@@ -61,59 +58,49 @@ public class ClientLastly implements Runnable
 
     //接收据
     @Override
-    public void run()
-    {
-        try
-        {
+    public void run() {
+        try {
             //连接服务器
             clientSocket = new Socket(server_ip, Constants.INSTANCE.getHOST_PORT());
             LogUtils.dTag(TAG, "=======连接服务器成功=========");
             clientSocket.setSoTimeout(timeout);
             printWriter = new PrintWriter(clientSocket.getOutputStream());
             bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        try
-        {
-            String result = "";
-            while ((result = bufferedReader.readLine()) != null)
-            {
-                LogUtils.dTag(TAG, "客户端接到的数据为：" + result);
-                //将数据带回acitvity显示
-                Message msg = handler.obtainMessage();
-                msg.arg1 = CLIENT_ARG;
-                msg.obj = result;
-                handler.sendMessage(msg);
+        try {
+            if (bufferedReader != null && !TextUtils.isEmpty(bufferedReader.readLine())) {
+                String result = "";
+                while ((result = bufferedReader.readLine()) != null) {
+                    LogUtils.dTag(TAG, "客户端接到的数据为：" + result);
+                    //将数据带回acitvity显示
+                    Message msg = handler.obtainMessage();
+                    msg.arg1 = CLIENT_ARG;
+                    msg.obj = result;
+                    handler.sendMessage(msg);
+                }
             }
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-    public void close()
-    {
-        try
-        {
-            if (printWriter != null)
-            {
+    public void close() {
+        try {
+            if (printWriter != null) {
                 printWriter.close();
             }
-            if (bufferedReader != null)
-            {
+            if (bufferedReader != null) {
                 bufferedReader.close();
             }
-            if (clientSocket != null)
-            {
+            if (clientSocket != null) {
                 clientSocket.close();
             }
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

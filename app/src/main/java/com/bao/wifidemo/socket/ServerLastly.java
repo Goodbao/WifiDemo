@@ -2,6 +2,7 @@ package com.bao.wifidemo.socket;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.bao.wifidemo.utils.Constants;
 import com.blankj.utilcode.util.LogUtils;
@@ -19,8 +20,7 @@ import java.net.Socket;
  *
  * @author Administrator
  */
-public class ServerLastly implements Runnable
-{
+public class ServerLastly implements Runnable {
     private static final String TAG = "tcp_server";
     public static final int SERVER_ARG = 0x11;
     private ServerSocket serverSocket;
@@ -35,8 +35,7 @@ public class ServerLastly implements Runnable
      * 我在activity的onCreate()中创建示例，如果将连接代码 写在构造方法中，服务端会一直等待客户端连接，界面没有去描绘，会一直出现白屏。
      * 直到客户端连接上了，界面才会描绘出来。原因是构造方法阻塞了主线程，要另开一个线程。在这里我将它写在了run()中。
      */
-    public ServerLastly(Handler handler)
-    {
+    public ServerLastly(Handler handler) {
         this.handler = handler;
 //        Log.i(TAG, "Server=======打开服务=========");
 //        try {
@@ -56,11 +55,9 @@ public class ServerLastly implements Runnable
     }
 
     //发数据
-    public void send(String data)
-    {
+    public void send(String data) {
         LogUtils.dTag(TAG, "服务端发送：" + data);
-        if (printWriter != null)
-        {
+        if (printWriter != null) {
             printWriter.println(data);
             printWriter.flush();
         }
@@ -68,11 +65,9 @@ public class ServerLastly implements Runnable
 
     //接数据
     @Override
-    public void run()
-    {
+    public void run() {
         LogUtils.dTag(TAG, "=======打开服务=========");
-        try
-        {
+        try {
             serverSocket = new ServerSocket(Constants.INSTANCE.getHOST_PORT());
             clientSocket = serverSocket.accept();
             LogUtils.dTag(TAG, "======客户端连接成功=========");
@@ -82,54 +77,45 @@ public class ServerLastly implements Runnable
             printWriter = new PrintWriter(clientSocket.getOutputStream());
             bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
 
-        try
-        {
-            String result = "";
-            while ((result = bufferedReader.readLine()) != null)
-            {
-                LogUtils.dTag(TAG, "服务端接到的数据为：" + result);
-                //把数据带回activity显示
-                Message msg = handler.obtainMessage();
-                msg.obj = result;
-                msg.arg1 = SERVER_ARG;
-                handler.sendMessage(msg);
+        try {
+            if (bufferedReader != null &&!TextUtils.isEmpty(bufferedReader.readLine())) {
+                String result = "";
+                while ((result = bufferedReader.readLine()) != null) {
+                    LogUtils.dTag(TAG, "服务端接到的数据为：" + result);
+                    //把数据带回activity显示
+                    Message msg = handler.obtainMessage();
+                    msg.obj = result;
+                    msg.arg1 = SERVER_ARG;
+                    handler.sendMessage(msg);
+                }
             }
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-    public void close()
-    {
-        try
-        {
-            if (printWriter != null)
-            {
+    public void close() {
+        try {
+            if (printWriter != null) {
                 printWriter.close();
             }
-            if (bufferedReader != null)
-            {
+            if (bufferedReader != null) {
                 bufferedReader.close();
             }
-            if (clientSocket != null)
-            {
+            if (clientSocket != null) {
                 clientSocket.close();
             }
-            if (serverSocket != null)
-            {
+            if (serverSocket != null) {
                 serverSocket.close();
             }
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

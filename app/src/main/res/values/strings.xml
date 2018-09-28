@@ -10,6 +10,8 @@
     <string name="scan_wifi">搜索wifi</string>
     <string name="connection_wifi">连接</string>
     <string name="disconnection_wifi">断开</string>
+    <string name="create_ap">创建ap热点</string>
+    <string name="close_ap">关闭ap热点</string>
     <string name="delete_wifi">删除</string>
     <string name="wifi_name">wifi名称</string>
     <string name="wifi_pwd">wifi密码</string>
