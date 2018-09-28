@@ -3,6 +3,10 @@ Android Wifi控制、TCP、UDP通信，6.0以上适配
 
 [详细文档](https://www.jianshu.com/p/572ac573e4b8)
 
+![wifi连接](https://upload-images.jianshu.io/upload_images/1627327-76fc1f9ea704758a.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/519/format/webp)
+
+![wifi信息](https://upload-images.jianshu.io/upload_images/1627327-be923441db25be08.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/517/format/webp)
+
 对于6.0以上，如果你要连接不是自己创建的配置，只需要在mWifiManager.getConfiguredNetworks()，翻出以前连接过的的Wifi 配置，获取对应的netId,就能重新连接上。
 
 如果以前连接过的 Wifi 密码改了，但是名称没变，你是连不上的，也没权限去修改密码和删除（可能就是为了安全吧），你就要手动去处理这个Wifi 信息了。
